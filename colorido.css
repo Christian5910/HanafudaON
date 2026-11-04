@@ -1,0 +1,729 @@
+/* ==========================================================================
+   HanafudaON! - colorido.css (só o que é do jogo)
+   Header, menu, modais, rodapé, botões e scrollbar vêm de on.css.
+   O desenho das cartas vem de hanafuda.css (par do hanafuda.js).
+
+   Índice
+   1. Variáveis e layout
+   2. Botão do jogo atual e placar
+   3. Mesa, cartas e rótulos
+   4. Tela de início, resultado e passar o aparelho
+   5. Mensagem, decisões, botões e opções
+   6. Escolher jogo
+   7. Capturas
+   8. Como Jogar (abas, jogos, tabelas)
+   9. Modo escuro
+   10. Responsividade
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Variáveis e layout
+   ========================================================================== */
+:root {
+    --tab-max: 1600px;
+    --mesa-borda: rgba(144, 202, 249, 0.3);
+    --mesa-fundo: rgba(6, 47, 81, 0.45);
+    --feltro: rgba(8, 78, 66, 0.55);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px 6px 4px;
+}
+
+#game-area {
+    width: 100%;
+    max-width: var(--tab-max);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 0;
+}
+
+/* ==========================================================================
+   2. Botão do jogo atual e placar
+   ========================================================================== */
+#modo-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 6px 12px 6px 8px;
+    border-radius: 12px;
+    border: 2px solid var(--mesa-borda);
+    background: var(--mesa-fundo);
+    color: var(--light-blue);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+#modo-btn:active { transform: scale(0.99); }
+#modo-btn:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+
+#modo-mini { flex-shrink: 0; display: block; width: 70px; }
+
+.capa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.capa .hcarta-mini {
+    width: 22px;
+    flex-shrink: 0;
+    vertical-align: baseline;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.capa .hcarta-mini + .hcarta-mini { margin-left: -7px; }
+.capa .hcarta-mini:nth-child(1) { transform: rotate(-9deg); }
+.capa .hcarta-mini:nth-child(3) { transform: rotate(9deg); }
+.capa .hcarta-mini:nth-child(2) { position: relative; z-index: 1; }
+
+.modo-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+
+.nivel-rotulo {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #d3e9fc;
+}
+
+#modo-nome { color: #fff; font-size: 1.15rem; line-height: 1.15; overflow-wrap: anywhere; }
+
+.modo-trocar {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--light-blue);
+}
+
+#hud { display: flex; gap: 8px; }
+
+.hud-box {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    border: 2px solid var(--mesa-borda);
+    background: var(--mesa-fundo);
+    min-height: 54px;
+}
+
+.hud-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #d3e9fc;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.hud-box b {
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   3. Mesa, cartas e rótulos
+   ========================================================================== */
+#mesa-box {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    border-radius: 16px;
+    border: 2px solid var(--mesa-borda);
+    background: var(--feltro);
+    overflow: hidden;
+}
+
+#mesa {
+    --w: 56px;
+    --h: 92px;
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.mesa-camada { position: absolute; inset: 0; }
+
+.mesa-rotulos { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+
+.mesa-rotulos > div { position: absolute; left: 0; top: 0; }
+
+.hcarta.fora { visibility: hidden; transition: none; }
+.hcarta.sem-trans, .hcarta.sem-trans .hgiro { transition: none !important; }
+
+.hcarta.pega:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+.hcarta.pega:hover .hfrente { filter: brightness(1.04); }
+
+.zona-campo {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 12px;
+    border: 2px dashed rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: auto;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.zona-campo.alvo {
+    border-color: rgba(251, 192, 45, 0.95);
+    background: rgba(251, 192, 45, 0.14);
+    cursor: pointer;
+}
+
+.rot {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    height: 18px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.74rem;
+    line-height: 18px;
+    color: var(--light-blue);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.rot b { color: #fff; font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
+.rot i { font-style: normal; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #ffe082; }
+.rot span { margin-left: auto; font-variant-numeric: tabular-nums; opacity: 0.92; }
+.rot.vez { background: rgba(251, 192, 45, 0.28); box-shadow: inset 0 0 0 1px rgba(251, 192, 45, 0.8); }
+.rot.meu { background: rgba(25, 118, 210, 0.4); }
+.rot.meu.vez { background: rgba(251, 192, 45, 0.3); }
+.rot-monte { background: transparent; color: rgba(255, 255, 255, 0.85); font-weight: 700; }
+
+/* ==========================================================================
+   4. Tela de início, resultado e passar o aparelho
+   ========================================================================== */
+#tela {
+    position: absolute;
+    inset: 0;
+    z-index: 4000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    overflow-y: auto;
+    background: rgba(6, 30, 56, 0.55);
+    animation: aparece 0.35s var(--ease);
+}
+
+#tela[hidden] { display: none; }
+
+@keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+
+.tela-card {
+    width: min(100%, 380px);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    padding: 18px 16px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(144, 202, 249, 0.6);
+    background: rgba(8, 35, 59, 0.96);
+    color: #fff;
+}
+
+.tela-card h2 { margin: 0; font-size: 1.45rem; }
+.tela-card p { margin: 0; font-size: 0.95rem; color: var(--light-blue); line-height: 1.45; }
+.tela-card .btn { margin-top: 4px; width: 100%; }
+.tela-card .btn-secondary { color: var(--light-blue); }
+.tela-jp { font-size: 1.6rem !important; color: #ffe082 !important; letter-spacing: 0.08em; }
+.tela-sub { font-size: 0.85rem !important; opacity: 0.85; }
+
+.res { width: 100%; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.res-motivo { text-align: center; font-weight: 700; }
+
+.res-lin {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 8px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: rgba(144, 202, 249, 0.09);
+    border: 1px solid rgba(144, 202, 249, 0.25);
+}
+
+.res-lin.vence { border-color: #fbc02d; background: rgba(251, 192, 45, 0.14); }
+.res-lin b { color: #fff; font-size: 0.95rem; }
+.res-lin small { grid-column: 1 / -1; color: var(--light-blue); font-size: 0.78rem; line-height: 1.35; }
+.res-g { font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+.res-g.pos { color: #81c784; }
+.res-g.neg { color: #ef9a9a; }
+
+/* ==========================================================================
+   5. Mensagem, decisões, botões e opções
+   ========================================================================== */
+#message-container { min-height: 24px; display: flex; align-items: center; justify-content: center; }
+
+/* tela empilhada (celular em pé): jogo, placar e mensagem em cima, mesa no meio, decisões sempre à vista */
+#modo-btn { order: 1; }
+#hud { order: 2; }
+#message-container { order: 3; }
+#mesa-box { order: 4; }
+#acoes { order: 5; position: sticky; bottom: 8px; z-index: 60; background: rgba(8, 35, 59, 0.97); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45); }
+#toolbar { order: 6; }
+#restart-btn { order: 7; }
+#config { order: 8; }
+
+#message-area {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    color: var(--light-blue);
+}
+
+#acoes {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid rgba(251, 192, 45, 0.7);
+    /* opaco: a mesa não pode aparecer por trás do texto quando o painel fica colado embaixo */
+    background: linear-gradient(rgba(251, 192, 45, 0.1), rgba(251, 192, 45, 0.1)), #08233b;
+}
+
+#acoes[hidden] { display: none; }
+.acoes-txt { margin: 0; text-align: center; font-weight: 700; font-size: 0.92rem; line-height: 1.4; color: #fff; }
+.acoes-nota { margin: 0; text-align: center; font-size: 0.8rem; color: var(--light-blue); }
+.acoes-bts { display: flex; gap: 8px; flex-wrap: wrap; }
+.acoes-bts .btn { flex: 1 1 130px; padding: 10px 12px; }
+.acoes-bts.pequeno .btn { padding: 6px 8px; min-height: 38px; font-size: 0.88rem; }
+#acoes .btn-secondary { color: var(--light-blue); }
+#acoes > .btn { width: 100%; }
+
+.aposta { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.aposta-v { min-width: 110px; text-align: center; font-size: 1.3rem; color: #fff; }
+
+.passo { display: inline-flex; align-items: center; gap: 8px; }
+.passo b { min-width: 24px; text-align: center; color: #fff; font-size: 1.1rem; }
+
+.passo-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 2px solid rgba(144, 202, 249, 0.5);
+    background: rgba(227, 242, 253, 0.1);
+    color: var(--light-blue);
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.passo-btn:active:not(:disabled) { background: rgba(227, 242, 253, 0.22); transform: scale(0.95); }
+.passo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.passo-btn:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+
+#toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tool-btn {
+    flex: 1 1 0;
+    min-width: 76px;
+    background: rgba(227, 242, 253, 0.1);
+    border: 2px solid rgba(144, 202, 249, 0.5);
+    color: var(--light-blue);
+    padding: 6px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    min-height: 44px;
+}
+
+.tool-btn:active:not(:disabled) { background: rgba(227, 242, 253, 0.2); transform: scale(0.97); }
+.tool-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+#restart-btn { margin-bottom: 0; }
+#config { padding: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
+
+#partida-btn .opc-txt, #cartas-btn .opc-txt { margin-right: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; flex: 1; text-align: left; }
+#partida-btn .opc-txt b, #cartas-btn .opc-txt b { color: #fff; font-size: 1.02rem; line-height: 1.2; }
+.acc-panel > div { padding-top: 4px; }
+.acc-panel .linha-cfg + .linha-cfg { margin-top: 8px; }
+.acc-panel[hidden], .linha-cfg[hidden], .nivel-nome[hidden] { display: none; }
+
+.linha-cfg { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+
+.rotulo-cfg {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #d3e9fc;
+    flex-shrink: 0;
+}
+
+.seg { display: flex; gap: 6px; flex: 1; max-width: 320px; }
+
+.seg-btn {
+    flex: 1;
+    background: rgba(227, 242, 253, 0.1);
+    border: 2px solid rgba(144, 202, 249, 0.5);
+    color: var(--light-blue);
+    padding: 6px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    min-height: 40px;
+}
+
+.seg-btn:active:not(:disabled) { background: rgba(227, 242, 253, 0.2); transform: scale(0.96); }
+.seg-btn[aria-pressed="true"] { background: #1976d2; border-color: rgba(144, 202, 249, 0.9); color: #fff; }
+.seg-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+.seg-btn:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+
+.nivel-nome { margin: 8px 0 0; font-size: 0.82rem; color: var(--light-blue); line-height: 1.35; }
+#partida-aviso, #cartas-aviso { margin: 10px 0 0; font-size: 0.78rem; color: #a7c7f7; }
+
+/* escolha da borda: mostra a carta de verdade */
+.borda-op { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; }
+
+.borda-prev { display: inline-block; width: 26px; flex-shrink: 0; }
+.borda-prev img { display: block; width: 100%; height: auto; border-radius: 3px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* ==========================================================================
+   6. Escolher jogo
+   ========================================================================== */
+#jogos-modal .modal-body { gap: 0; }
+.sec-jogos + .sec-jogos { margin-top: 18px; }
+.sec-jogos h3 { margin: 0; font-size: 0.95rem; }
+.sec-jogos .sec-sub { margin: 2px 0 8px; font-size: 0.82rem; color: var(--modal-sub); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 8px; }
+
+.tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px 8px 8px;
+    text-align: left;
+    font: inherit;
+    color: var(--modal-text);
+    background: rgba(13, 60, 117, 0.05);
+    border: 2px solid var(--modal-line);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.tile:active { transform: scale(0.985); }
+.tile:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+.tile[aria-current="true"] { border-color: #1976d2; background: rgba(25, 118, 210, 0.12); }
+
+.tile-mini { flex-shrink: 0; width: 78px; display: block; }
+.tile-mini .capa .hcarta-mini { width: 24px; }
+.tile-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.tile-nome { font-weight: 800; font-size: 1rem; color: var(--modal-title); overflow-wrap: anywhere; line-height: 1.15; }
+.tile-jp { margin-left: 6px; font-size: 0.75rem; font-weight: 600; opacity: 0.75; }
+.tile-dif { display: flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 700; color: var(--modal-sub); flex-wrap: wrap; }
+.pontos-dif { display: inline-flex; gap: 3px; flex-shrink: 0; }
+.pontos-dif i { width: 7px; height: 7px; border-radius: 50%; background: rgba(13, 60, 117, 0.22); }
+.pontos-dif i.on { background: #1976d2; }
+.tile-desc { font-size: 0.8rem; line-height: 1.3; color: var(--modal-text); opacity: 0.88; }
+
+.tile-selo {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    background: #1976d2;
+    color: #fff;
+}
+
+.tile-selo.andamento { background: #2e7d32; }
+
+/* ==========================================================================
+   7. Capturas
+   ========================================================================== */
+.capt-sec + .capt-sec { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--modal-line); }
+.capt-sec h3 { margin: 0 0 4px; font-size: 1rem; }
+.capt-yaku { margin: 0 0 6px; font-weight: 700; color: #2e7d32; }
+.capt-grupo { margin-top: 6px; }
+.capt-tipo { display: block; font-size: 0.78rem; font-weight: 800; color: var(--modal-sub); margin-bottom: 3px; }
+.capt-cartas { display: flex; flex-wrap: wrap; gap: 4px; }
+.capt-cartas .hcarta-mini { width: 34px; }
+.capt-vazio { margin: 0; color: var(--modal-sub); font-size: 0.88rem; }
+
+/* ==========================================================================
+   8. Como Jogar (abas, jogos, tabelas)
+   ========================================================================== */
+.abas { display: flex; gap: 6px; padding: 10px 24px 0; border-bottom: 1px solid var(--modal-line); }
+
+.aba {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 8px;
+    border: 2px solid var(--modal-line);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: transparent;
+    color: var(--modal-sub);
+    font-weight: 800;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.aba[aria-selected="true"] { background: #1976d2; border-color: #1976d2; color: #fff; }
+.aba:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+.modal-body[hidden] { display: none; }
+.intro-jogos { font-weight: 600; }
+
+#painel-jogos details { border: 1px solid var(--modal-line); border-radius: 10px; padding: 0 12px; background: rgba(13, 60, 117, 0.04); }
+#painel-jogos details + details { margin-top: 8px; }
+
+#painel-jogos summary {
+    cursor: pointer;
+    padding: 11px 0;
+    font-weight: 800;
+    color: var(--modal-title);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+#painel-jogos summary small { margin-left: auto; font-weight: 600; font-size: 0.78rem; color: var(--modal-sub); text-align: right; }
+#painel-jogos summary::-webkit-details-marker { display: none; }
+#painel-jogos summary::after { content: "+"; font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+#painel-jogos details[open] summary::after { content: "\2212"; }
+#painel-jogos details[open] { padding-bottom: 12px; }
+#painel-jogos summary:focus-visible { outline: 3px solid var(--accent-blue); outline-offset: 2px; border-radius: 6px; }
+
+.ajuda-jogo > * + * { margin-top: 10px; }
+.texto-ajuda h3 { margin: 14px 0 4px; font-size: 1.02rem; }
+.texto-ajuda h3:first-child { margin-top: 0; }
+.texto-ajuda h4 { margin: 12px 0 2px; font-size: 0.95rem; }
+.texto-ajuda ul, .texto-ajuda ol { padding-left: 1.2em; }
+.texto-ajuda li + li { margin-top: 4px; }
+.texto-ajuda ruby rt { font-size: 0.55em; font-weight: 600; }
+.texto-ajuda .jp { font-family: "Noto Sans CJK JP", "Yu Gothic", "Hiragino Sans", Meiryo, system-ui, sans-serif; }
+.texto-ajuda .nota { padding: 8px 10px; border: 1px solid rgba(249, 168, 37, 0.55); border-radius: 8px; background: rgba(249, 168, 37, 0.14); font-size: 0.9rem; }
+.texto-ajuda .mc-ok .hcarta-mini { width: 1.7em; margin: 0 1px; }
+.texto-ajuda .linha-cartas { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
+.texto-ajuda .linha-cartas .hcarta-mini { width: 2.1em; }
+
+.tab-rolagem { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.tab-yaku { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.tab-yaku th, .tab-yaku td { padding: 5px 6px; border-bottom: 1px solid var(--modal-line); text-align: left; vertical-align: top; }
+.tab-yaku th { font-size: 0.76rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--modal-sub); }
+.tab-yaku td:last-child { font-weight: 800; white-space: nowrap; text-align: right; }
+.tab-yaku .hcarta-mini { width: 1.5em; }
+.tab-yaku td { overflow-wrap: anywhere; }
+.tab-yaku td:last-child { overflow-wrap: normal; }
+
+/* tela muito estreita: cada linha vira um bloco, sem rolagem lateral escondendo a coluna dos pontos */
+@media (max-width: 340px) {
+    .tab-yaku, .tab-yaku tbody, .tab-yaku tr, .tab-yaku td { display: block; width: 100%; }
+    .tab-yaku thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .tab-yaku tr { padding: 6px 0; border-bottom: 1px solid var(--modal-line); }
+    .tab-yaku td { padding: 2px 0; border: 0; text-align: left; }
+    .tab-yaku td:last-child { text-align: left; white-space: normal; }
+    .tab-yaku td:not(:first-child)::before { content: attr(data-l); display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--modal-sub); }
+    .tab-yaku td:first-child { font-weight: 800; }
+}
+
+#painel-jogos .sn-jp { white-space: nowrap; }
+
+/* ==========================================================================
+   9. Modo escuro
+   ========================================================================== */
+html[data-tema="escuro"] { --mesa-fundo: rgba(3, 12, 24, 0.7); --feltro: rgba(4, 40, 34, 0.75); }
+html[data-tema="escuro"] .hfrente { filter: brightness(0.92); }
+html[data-tema="escuro"] .tile { background: rgba(144, 202, 249, 0.07); }
+html[data-tema="escuro"] .tile[aria-current="true"] { background: rgba(25, 118, 210, 0.3); }
+html[data-tema="escuro"] .pontos-dif i { background: rgba(144, 202, 249, 0.25); }
+html[data-tema="escuro"] .pontos-dif i.on { background: #64b5f6; }
+html[data-tema="escuro"] #painel-jogos details { background: rgba(144, 202, 249, 0.06); }
+html[data-tema="escuro"] .capt-yaku { color: #81c784; }
+
+/* ==========================================================================
+   10. Responsividade
+   ========================================================================== */
+@media (hover: hover) {
+    .seg-btn:hover:not(:disabled), .tool-btn:hover:not(:disabled), #modo-btn:hover, .passo-btn:hover:not(:disabled) {
+        background: rgba(227, 242, 253, 0.18);
+        border-color: rgba(144, 202, 249, 0.8);
+    }
+
+    .seg-btn[aria-pressed="true"]:hover:not(:disabled) { background: #1976d2; }
+    .tile:hover { border-color: #1976d2; }
+}
+
+/* Tela deitada: controles à esquerda, mesa à direita na altura toda */
+@media (orientation: landscape) and (min-width: 540px) {
+    :root { --painel: clamp(184px, 25vw, 280px); }
+
+    main { padding: 8px 8px 4px; }
+
+    #game-area {
+        display: grid;
+        grid-template-columns: var(--painel) minmax(0, 1fr);
+        grid-template-rows: repeat(7, auto) 1fr;
+        column-gap: 10px;
+        row-gap: 8px;
+        align-items: start;
+    }
+
+    #modo-btn, #hud, #message-container, #acoes, #toolbar, #restart-btn, #config { grid-column: 1; }
+    #acoes { position: static; box-shadow: none; }
+    #modo-btn { grid-row: 1; }
+    #hud { grid-row: 2; }
+    #message-container { grid-row: 3; min-height: 0; }
+    #acoes { grid-row: 4; }
+    #toolbar { grid-row: 5; }
+    #restart-btn { grid-row: 6; }
+    #config { grid-row: 7; padding-bottom: 0; }
+    /* a mesa acompanha a rolagem do painel: dois blocos, um fixo e outro que rola */
+    #mesa-box { grid-column: 2; grid-row: 1 / -1; position: sticky; top: calc(var(--header-height, 60px) + 10px); align-self: start; }
+
+    #modo-btn { min-height: 48px; gap: 8px; padding: 5px 8px 5px 6px; }
+    #modo-mini { width: 54px; }
+    #modo-nome { font-size: 1.02rem; }
+    .modo-trocar { font-size: 0; }
+    #hud { flex-direction: column; gap: 6px; }
+    .hud-box { flex-direction: row; justify-content: space-between; min-height: 38px; padding: 4px 10px; }
+    .hud-box b { font-size: 1.1rem; }
+    .tool-btn { min-width: 0; min-height: 40px; font-size: 0.88rem; }
+    #restart-btn { padding: 8px 12px; min-height: 42px; }
+    #message-area { font-size: 0.82rem; }
+    .acoes-bts .btn { flex-basis: 100%; }
+    .borda-op { flex-direction: column; gap: 3px; }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+    :root { --header-height: 48px; }
+    header h1 { font-size: 1.15rem; }
+    #hud { flex-direction: row; gap: 6px; }
+    .hud-box { flex-direction: column; justify-content: center; align-items: center; min-height: 44px; padding: 3px 4px; }
+    .hud-box b { font-size: 0.95rem; }
+    .hud-label { font-size: 0.64rem; letter-spacing: 0; text-transform: none; }
+    #toolbar { gap: 6px; }
+    .tool-btn { font-size: 0.76rem; padding: 4px 1px; }
+    #modo-mini { width: 44px; }
+    .acoes-bts .btn { flex-basis: 45%; }
+    #acoes { padding: 8px; gap: 6px; }
+    .tela-card { padding: 12px 14px; gap: 6px; }
+    .tela-card h2 { font-size: 1.2rem; }
+    .tela-card p { font-size: 0.85rem; line-height: 1.35; }
+    #tela { padding: 8px; }
+}
+
+@media (max-width: 420px) {
+    main { padding: 8px 4px 4px; }
+    .rotulo-cfg { font-size: 0.72rem; }
+    .seg-btn { font-size: 0.8rem; padding: 4px; }
+    .hud-box b { font-size: 1.1rem; }
+    .abas { padding: 8px 14px 0; }
+    .linha-cfg { flex-wrap: wrap; }
+    .seg { max-width: none; }
+}
+
+@media (max-width: 300px) {
+    header { padding: 0 8px; gap: 6px; }
+    header h1 { font-size: 1.12rem; }
+    #modo-btn { gap: 8px; padding: 6px 8px 6px 6px; }
+    #modo-mini { width: 56px; }
+    #modo-nome { font-size: 1rem; }
+    .modo-trocar { font-size: 0; }
+    .hud-box { padding: 6px 4px; }
+    .hud-label { font-size: 0.6875rem; letter-spacing: 0; text-transform: none; }
+    .hud-box b { font-size: 0.98rem; }
+    .tool-btn { min-width: 0; font-size: 0.8rem; padding: 4px; }
+    .rot { font-size: 0.62rem; padding: 0 3px; gap: 3px; }
+    .rot i { display: none; }
+    .tile { flex-direction: column; align-items: flex-start; padding: 8px; gap: 6px; }
+    .tile-mini { width: 100%; }
+    .tile-txt { width: 100%; }
+    .aba { font-size: 0.78rem; padding: 8px 4px; }
+    #painel-jogos summary small { display: none; }
+    .acoes-bts .btn { flex-basis: 100%; }
+    .aposta-v { min-width: 80px; font-size: 1.1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #tela { animation: none; }
+}
+
+html[data-reduzir="1"] #tela { animation: none; }
+html[data-reduzir="1"] .hcarta, html[data-reduzir="1"] .hgiro { transition: none; }
+
+/* verso das cartas: contorno claro para aparecer sobre o feltro escuro */
+.hverso { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4), 2px 0 5px rgba(0, 0, 0, 0.6); }
+
+/* o verso é uma cor lisa: uma trama leve e uma moldura clara separam as cartas quando se sobrepõem */
+.hverso::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0 5px, transparent 5px 10px);
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.rot-monte.selo { justify-content: center; padding: 0; height: 20px; line-height: 20px; border-radius: 10px; background: rgba(0, 0, 0, 0.62); color: #fff; font-weight: 800; font-size: 0.78rem; }
+.rot-monte.curto { justify-content: center; padding: 0; font-size: 0.74rem; }
+
+/* as posições de mesa.js são do canto superior esquerdo da carta (a escala não pode deslocá-la) */
+#mesa .hcarta { transform-origin: 0 0; }
+
+#mesa-box { min-height: 280px; }
+.texto-ajuda .jp { line-height: 2.1; }
+.tab-yaku .linha-cartas { gap: 2px; margin: 2px 0 0; }
+.tab-yaku .linha-cartas .hcarta-mini { width: 1.45em; }
+
+.assinatura-final { opacity: 1; }

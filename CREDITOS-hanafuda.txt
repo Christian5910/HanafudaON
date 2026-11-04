@@ -1,0 +1,24 @@
+Cartas de Hanafuda (花札)
+
+Borda preta
+  Autores: Louie Mantia, すけじょ
+  Origem: https://commons.wikimedia.org/wiki/File:Hanafuda_January_Hikari_Alt.svg
+  Pasta: preta
+
+Borda vermelha
+  Autores: Louie Mantia Jr., すけじょ
+  Origem: https://commons.wikimedia.org/wiki/File:Hanafuda_January_Hikari_Alt2.svg
+  Pasta: vermelha
+
+Licenca: Creative Commons Atribuicao-CompartilhaIgual 4.0 Internacional (CC BY-SA 4.0)
+https://creativecommons.org/licenses/by-sa/4.0
+
+Alteracoes feitas: os arquivos foram renomeados (00.svg a 47.svg, mais verso.svg) e otimizados
+com SVGO, sem mudar o desenho. O verso.svg de cada pasta e uma cor lisa. Como a licenca exige
+o mesmo compartilhamento, as imagens modificadas continuam sob a CC BY-SA 4.0.
+
+A ordem dos arquivos e a de hanafuda.js: de 4 em 4 por mes, e dentro do mes hikari, tane,
+tanzaku, kasu.
+
+Ao publicar um jogo com estas cartas, mantenha este arquivo na pasta hanafuda/ e o credito visivel
+no rodape e no Como Jogar.

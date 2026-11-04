@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>HanafudaON!</title>
+  <meta name="description" content="HanafudaON!: 10 jogos de Hanafuda no navegador. Koi-Koi, Hachi-Hachi, Hana-Awase, Oicho-Kabu, Mushi, Roppyakken, Sudaoshi, Tensho, Bakappana e Kingo, contra o robô em 5 níveis ou no mesmo aparelho." />
+  <meta name="theme-color" content="#007ACC" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <script>/* aplica tema, animações e borda das cartas antes de pintar (evita "piscar") */
+  try{var c={};try{c=JSON.parse(localStorage.getItem('hanafudaon.cfg')||'{}')||{}}catch(e){}var d=document.documentElement,r=c.reduzir,t=c.tema;
+  if(t!=='escuro'&&t!=='claro')t=c.escuro===true?'escuro':null;
+  if(r===undefined||r===null)r=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(t?t==='escuro':matchMedia('(prefers-color-scheme: dark)').matches)d.setAttribute('data-tema','escuro');if(r)d.setAttribute('data-reduzir','1');
+  try{var p=JSON.parse(localStorage.getItem('hanafudaon.prefs')||'{}')||{};if(p.indice)d.setAttribute('data-indice','sim')}catch(e){}}catch(e){}</script>
+  <link rel="stylesheet" href="on.css" />
+  <link rel="stylesheet" href="hanafuda.css" />
+  <link rel="stylesheet" href="colorido.css" />
+  <script defer src="on.js"></script>
+  <script defer src="hanafuda.js"></script>
+  <script defer src="nucleo.js"></script>
+  <script defer src="captura.js"></script>
+  <script defer src="jogos-captura.js"></script>
+  <script defer src="kabu.js"></script>
+  <script defer src="robo.js"></script>
+  <script defer src="textos.js"></script>
+  <script defer src="mesa.js"></script>
+  <script defer src="javinhas.js"></script>
+</head>
+<body>
+  <header>
+    <button id="menu-btn" type="button" aria-label="Abrir menu" aria-controls="drawer" data-abrir="drawer">☰</button>
+    <h1>HanafudaON!</h1>
+    <button id="howto-btn" class="header-btn" type="button" aria-haspopup="dialog" data-abrir="howto-modal">Como Jogar</button>
+  </header>
+
+  <div id="overlay" hidden></div>
+
+  <!-- Modal "Como Jogar": usar o site, cada jogo e créditos -->
+  <div id="howto-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2 id="howto-title">Como Jogar HanafudaON!</h2>
+        <button class="modal-x" type="button" aria-label="Fechar" data-fechar>✕</button>
+      </div>
+      <div class="abas" role="tablist" aria-label="Seções da ajuda">
+        <button class="aba" id="aba-geral" type="button" role="tab" aria-selected="true" aria-controls="painel-geral">Hanafuda</button>
+        <button class="aba" id="aba-jogos" type="button" role="tab" aria-selected="false" aria-controls="painel-jogos" tabindex="-1">Os jogos</button>
+        <button class="aba" id="aba-creditos" type="button" role="tab" aria-selected="false" aria-controls="painel-creditos" tabindex="-1">Créditos</button>
+      </div>
+      <div class="modal-body texto-ajuda" id="painel-geral" role="tabpanel" aria-labelledby="aba-geral"></div>
+      <div class="modal-body texto-ajuda" id="painel-jogos" role="tabpanel" aria-labelledby="aba-jogos" hidden></div>
+      <div class="modal-body texto-ajuda" id="painel-creditos" role="tabpanel" aria-labelledby="aba-creditos" hidden></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" data-fechar data-foco>Entendi!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Escolher jogo" -->
+  <div id="jogos-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="jogos-title">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2 id="jogos-title">Escolher jogo</h2>
+        <button class="modal-x" type="button" aria-label="Fechar" data-fechar>✕</button>
+      </div>
+      <div class="modal-body" id="jogos-corpo"></div>
+    </div>
+  </div>
+
+  <!-- Modal "Capturas" -->
+  <div id="capt-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="capt-title">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2 id="capt-title">Cartas capturadas</h2>
+        <button class="modal-x" type="button" aria-label="Fechar" data-fechar>✕</button>
+      </div>
+      <div class="modal-body" id="capt-corpo"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" data-fechar>Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section id="game-area" aria-label="Mesa de Hanafuda">
+      <button id="modo-btn" type="button" aria-haspopup="dialog" data-abrir="jogos-modal">
+        <span id="modo-mini" aria-hidden="true"></span>
+        <span class="modo-txt"><span class="nivel-rotulo">Jogo</span><b id="modo-nome">Koi-Koi</b></span>
+        <span class="modo-trocar">Trocar<span class="ic" id="modo-chevron"></span></span>
+      </button>
+
+      <div id="hud">
+        <div class="hud-box"><span class="hud-label" id="hud-r1">Rodada</span><b id="hud-v1">1/3</b></div>
+        <div class="hud-box"><span class="hud-label" id="hud-r2">Seu placar</span><b id="hud-v2">0</b></div>
+        <div class="hud-box"><span class="hud-label" id="hud-r3">Vez</span><b id="hud-v3">Você</b></div>
+      </div>
+
+      <div id="mesa-box">
+        <div id="mesa" role="application" aria-label="Mesa de Hanafuda"></div>
+        <div id="tela" hidden>
+          <div class="tela-card" role="dialog" aria-live="polite">
+            <h2 id="tela-titulo"></h2>
+            <div id="tela-corpo"></div>
+            <button id="tela-btn" class="btn btn-primary" type="button">Jogar</button>
+            <button id="tela-btn2" class="btn btn-secondary" type="button" hidden>Ver a mesa</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="message-container"><div id="message-area" role="status" aria-live="polite"></div></div>
+
+      <div id="acoes" hidden></div>
+
+      <div id="toolbar">
+        <button id="hint-btn" class="tool-btn" type="button">Dica</button>
+        <button id="capt-btn" class="tool-btn" type="button">Capturas</button>
+        <button id="regras-btn" class="tool-btn" type="button">Regras</button>
+      </div>
+      <button id="restart-btn" class="btn btn-primary" type="button">Nova partida</button>
+
+      <div id="config" aria-label="Opções da partida">
+        <div class="acc" id="acc-partida">
+          <button class="acc-btn" id="partida-btn" type="button" aria-expanded="false" aria-controls="partida-painel">
+            <span class="opc-txt"><span class="nivel-rotulo">Partida</span><b id="partida-atual">Contra o robô, nível 3</b></span>
+            <span class="ic" id="partida-chevron"></span>
+          </button>
+          <div class="acc-panel" id="partida-painel" role="region" aria-labelledby="partida-btn">
+            <div>
+              <div class="linha-cfg">
+                <span class="rotulo-cfg">Modo</span>
+                <div id="op-modo" class="seg" role="group" aria-label="Modo de jogo">
+                  <button class="seg-btn" type="button" data-v="robo">Contra o robô</button>
+                  <button class="seg-btn" type="button" data-v="local">No mesmo aparelho</button>
+                </div>
+              </div>
+              <div class="linha-cfg" id="linha-jogadores">
+                <span class="rotulo-cfg">Jogadores</span>
+                <div class="passo" role="group" aria-label="Número de jogadores">
+                  <button id="jog-menos" class="passo-btn" type="button" aria-label="Menos um jogador">−</button>
+                  <b id="jog-valor">2</b>
+                  <button id="jog-mais" class="passo-btn" type="button" aria-label="Mais um jogador">+</button>
+                </div>
+              </div>
+              <div class="linha-cfg" id="linha-nivel">
+                <span class="rotulo-cfg">Robô</span>
+                <div id="op-nivel" class="seg" role="group" aria-label="Nível do robô">
+                  <button class="seg-btn" type="button" data-v="1" aria-label="Nível 1, Iniciante">1</button>
+                  <button class="seg-btn" type="button" data-v="2" aria-label="Nível 2, Fácil">2</button>
+                  <button class="seg-btn" type="button" data-v="3" aria-label="Nível 3, Médio">3</button>
+                  <button class="seg-btn" type="button" data-v="4" aria-label="Nível 4, Difícil">4</button>
+                  <button class="seg-btn" type="button" data-v="5" aria-label="Nível 5, Mestre">5</button>
+                </div>
+              </div>
+              <p class="nivel-nome" id="nivel-nome"></p>
+              <div class="linha-cfg" id="linha-rodadas">
+                <span class="rotulo-cfg">Rodadas</span>
+                <div id="op-rodadas" class="seg" role="group" aria-label="Número de rodadas"></div>
+              </div>
+              <p id="partida-aviso">As opções valem a partir da próxima partida.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc" id="acc-cartas">
+          <button class="acc-btn" id="cartas-btn" type="button" aria-expanded="false" aria-controls="cartas-painel">
+            <span class="opc-txt"><span class="nivel-rotulo">Cartas</span><b id="cartas-atual">Borda preta</b></span>
+            <span class="ic" id="cartas-chevron"></span>
+          </button>
+          <div class="acc-panel" id="cartas-painel" role="region" aria-labelledby="cartas-btn">
+            <div>
+              <div class="linha-cfg">
+                <span class="rotulo-cfg">Borda</span>
+                <div id="op-borda" class="seg" role="group" aria-label="Borda das cartas">
+                  <button class="seg-btn borda-op" type="button" data-v="preta"><span class="borda-prev" data-v="preta" aria-hidden="true"></span>Preta</button>
+                  <button class="seg-btn borda-op" type="button" data-v="vermelha"><span class="borda-prev" data-v="vermelha" aria-hidden="true"></span>Vermelha</button>
+                </div>
+              </div>
+              <div class="linha-cfg">
+                <span class="rotulo-cfg">Índice</span>
+                <div id="op-indice" class="seg" role="group" aria-label="Índice nas cartas">
+                  <button class="seg-btn" type="button" data-v="nao">Escondido</button>
+                  <button class="seg-btn" type="button" data-v="sim">Visível</button>
+                </div>
+              </div>
+              <p id="cartas-aviso">O índice mostra o número do mês, a planta e o tipo no canto da carta. Ajuda a ler as cartas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="assinatura-final">© Christian, 2026</p>
+    <p class="creditos-cartas">Cartas: Louie Mantia e すけじょ, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>
+  </footer>
+</body>
+</html>

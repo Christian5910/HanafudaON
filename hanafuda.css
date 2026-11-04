@@ -1,0 +1,151 @@
+/* ==========================================================================
+   hanafuda.css - visual das cartas de Hanafuda da família ON! (par do hanafuda.js, reutilizável)
+   O jogo define as medidas com --w (largura) e --h (altura = largura x 1,639) no elemento que
+   contém as cartas e posiciona cada .hcarta com transform (como no cartas.css).
+   Estados: .sel (escolhida), .dica (sugestão), .erro (recusada), .oculta (mostra o verso),
+            .arrastando, .voa, .sem-sombra, .apagada (carta já usada ou fora de jogo)
+   Índice no canto (mês, planta e tipo): fica oculto; aparece com html[data-indice="sim"].
+   ========================================================================== */
+.hcarta {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--w);
+    height: var(--h);
+    perspective: 700px;
+    container-type: inline-size;
+    transition: transform 0.26s var(--ease, ease), opacity 0.2s;
+    will-change: transform;
+    cursor: default;
+}
+
+.hcarta.pega { cursor: grab; touch-action: none; }
+
+.hgiro {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.3s var(--ease, ease);
+}
+
+.hcarta.oculta .hgiro { transform: rotateY(180deg); }
+
+.hfrente,
+.hverso {
+    position: absolute;
+    inset: 0;
+    border-radius: 3.5% / 2.1%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    background: #fff;
+}
+
+.hfrente img,
+.hverso img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hverso { transform: rotateY(180deg); background: #000; }
+
+.hcarta.sem-sombra .hfrente,
+.hcarta.sem-sombra .hverso { box-shadow: none; }
+
+.hcarta.apagada { opacity: 0.35; }
+
+/* índice no canto: mês, planta e tipo (útil para aprender; oculto por padrão) */
+.hindice {
+    display: none;
+    position: absolute;
+    left: 4%;
+    top: 3%;
+    width: 24%;
+    padding: 3% 0 4%;
+    border-radius: 18%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-size: 4px;
+    font-size: 9.5cqw;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #2b2233;
+    font-family: "Noto Sans CJK JP", "Yu Gothic", "Hiragino Sans", Meiryo, system-ui, sans-serif;
+    pointer-events: none;
+}
+
+.hindice b { display: block; font-size: 1.1em; }
+.hindice i { display: block; margin: 8% 8% 0; border-radius: 99px; font-style: normal; font-size: 0.62em; color: #fff; background: #6b6b78; }
+.hindice.hikari i { background: #b8860b; }
+.hindice.tane i { background: #2f7d52; }
+.hindice.tanzaku i { background: #c43a31; }
+
+html[data-indice="sim"] .hindice { display: block; }
+
+/* em cartas muito pequenas o índice não cabe: some sozinho */
+@container (max-width: 40px) {
+    .hindice { display: none !important; }
+}
+
+/* miniatura de carta (ajuda, seletor, lista de capturas) */
+.hcarta-mini {
+    display: inline-block;
+    width: 1.3em;
+    aspect-ratio: 976 / 1600;
+    vertical-align: -0.4em;
+    border-radius: 0.12em;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.hcarta-mini img { display: block; width: 100%; height: 100%; }
+
+/* estados */
+.hcarta.arrastando { transition: none; z-index: 2000 !important; }
+.hcarta.arrastando .hfrente { box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45); }
+
+.hcarta.dica {
+    /* anula o .dica global do on.css (caixa de texto com borda e preenchimento) */
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font-size: inherit;
+}
+
+.hcarta.dica .hfrente,
+.hcarta.dica .hverso {
+    box-shadow: 0 0 0 3px #fbc02d, 0 0 16px 4px rgba(251, 192, 45, 0.85);
+    animation: hcarta-pulsa 0.9s ease-in-out infinite;
+}
+
+.hcarta.sel .hfrente { box-shadow: 0 0 0 3px #64b5f6, 0 0 14px 3px rgba(100, 181, 246, 0.8); }
+
+@keyframes hcarta-pulsa { 50% { filter: brightness(1.15); } }
+
+.hcarta.erro .hgiro { animation: hcarta-nao 0.35s var(--ease, ease); }
+
+@keyframes hcarta-nao {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.hcarta.voa { transition: none; z-index: 3000 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .hcarta, .hgiro { transition: none; }
+    .hcarta.dica .hfrente, .hcarta.dica .hverso { animation: none; }
+}
+html[data-reduzir="sim"] .hcarta,
+html[data-reduzir="sim"] .hgiro { transition: none; }
+html[data-reduzir="sim"] .hcarta.dica .hfrente,
+html[data-reduzir="sim"] .hcarta.dica .hverso { animation: none; }
