@@ -1,32 +1,87 @@
 # HanafudaON!
 
-10 jogos de Hanafuda em um site só (HTML, CSS e JavaScript puros, sem build), no estilo ON!.
-Koi-Koi, Hana-Awase, Hachi-Hachi, Bakappana, Mushi, Tensho, Roppyakken, Sudaoshi, Oicho-Kabu e Kingo.
-Contra o robô (5 níveis) ou no mesmo aparelho (2 a 10 pessoas conforme o jogo). Funciona offline.
+Dez jogos de Hanafuda (花札) em um site só, com o visual da família ON!, para celular e computador. Dá para jogar contra o robô em cinco níveis ou com outras pessoas no mesmo aparelho, uma de cada vez. O botão Como Jogar explica o baralho, o site e as regras de cada jogo, e tudo funciona offline.
 
-## Como publicar
-1. Rode `sync.ps1` na pasta Base-Compartilhada: ele copia `on.css`, `on.js`, `hanafuda.js`, `hanafuda.css` e as pastas `hanafuda/preta` e `hanafuda/vermelha`.
-2. Suba a pasta `HanafudaON` inteira no Netlify (site `hanafudaon`).
-3. A cada mudança de arquivo, aumente `CACHE_NAME` em `service-worker.js` (hoje `hanafudaon-v1`).
+**Jogue:** https://hanafudaon.netlify.app/ · **Mais jogos:** https://speccygames.netlify.app/
 
-## Arquivos
-| Arquivo | Função |
+<p align="center">
+  <img src="screenshots/mobile.png" alt="HanafudaON! no celular" height="460">
+  &nbsp;&nbsp;
+  <img src="screenshots/deitado.png" alt="HanafudaON! no celular deitado" height="300">
+</p>
+<p align="center">
+  <img src="screenshots/desktop.png" alt="HanafudaON! no computador" width="640">
+</p>
+
+## Os jogos
+
+| Jogo | Jogadores | Resumo |
+|---|---|---|
+| Koi-Koi (こいこい) | 2 | forme combinações e decida entre fechar ou arriscar com Koi-Koi |
+| Hana-Awase (花合せ) | 3 a 4 | todas as cartas são jogadas e as combinações contam no fim |
+| Hachi-Hachi (八八) | 3 a 6 | mãos iniciais, taxas, sage e meta de 88 |
+| Bakappana (バカ花) | 2 a 4 | pescar por mês e somar valores, sem combinações |
+| Mushi (虫) | 2 | duelo rápido sem peônia nem hagi, com a carta de raio como coringa |
+| Tensho (天正) | 2 | duelo com baralho reduzido e bônus por mês completo |
+| Roppyakken (六百間) | 2 a 3 | corrida até 600 pontos, com combinações de valor alto |
+| Sudaoshi (素倒し) | 3 a 6 | valores invertidos: o kasu vale mais e a luz vale menos |
+| Oicho-Kabu (おいちょかぶ) | 3 a 8 | apostas contra a banca, chegando o mais perto possível do 9 |
+| Kingo (金吾) | 2 a 10 | apostas contra a banca, chegando a 15 sem passar |
+
+Koi-Koi, Hana-Awase e Hachi-Hachi seguem as regras mais comuns (o Hachi-Hachi sem nuke, tobikomi, hatto e tate-sanbon). Os outros sete são adaptações simples, avisadas como "regra adotada no ON!" no Como Jogar de cada um.
+
+## Como jogar
+
+Escolha o jogo, o modo (contra o robô ou no mesmo aparelho), o nível e o número de rodadas, e toque em Jogar. Na primeira visita o Como Jogar abre sozinho.
+
+| Ação | Como fazer |
 |---|---|
-| `nucleo.js` | Cartas, tipos, sorteio com semente e funções comuns |
-| `captura.js` | Motor genérico dos jogos de pescar |
-| `jogos-captura.js` | As regras dos 8 jogos de pescar (Koi-Koi, Hachi-Hachi etc.) |
-| `kabu.js` | Oicho-Kabu e Kingo (apostas contra a banca) |
-| `robo.js`, `robo-worker.js` | Robô de 5 níveis (nível 4 e 5 usam simulação, em um Worker) |
-| `mesa.js` | Posição e deslize das 48 cartas, toque e arrasto |
-| `javinhas.js` | Tela: escolher jogo, partida, decisões, resultados, estatísticas |
-| `textos.js` | Como Jogar de cada jogo |
-| `colorido.css` | Visual do jogo (o resto vem de `on.css` e `hanafuda.css`) |
+| Jogar uma carta | tocar na carta da mão e depois na carta do campo que combina, ou arrastar a carta |
+| Escolher entre dois pares | tocar na carta do campo que você quer pegar |
+| Decidir (Koi-Koi, apostas) | botões que aparecem abaixo da mesa |
+| Dica | destaca uma boa jogada |
+| Capturas | mostra as cartas capturadas por cada pessoa |
+| Regras | abre as regras do jogo atual |
+| Nova partida | recomeça, depois de uma confirmação |
 
-Os motores não tocam no DOM e rodam no Node (testes em `testes-hanafudaon`).
+No mesmo aparelho, antes da vez de cada pessoa aparece a tela "Passe o aparelho" e as mãos dos outros ficam viradas para baixo. A partida é salva a cada jogada: feche a aba e continue depois.
+
+## O robô
+
+Cinco níveis: 1 joga ao acaso, 2 escolhe o melhor lance com erros, 3 escolhe o melhor lance, e 4 e 5 simulam partidas com as cartas escondidas sorteadas. Tudo roda no aparelho, então a tela não trava e não há servidor nem internet envolvidos. Em vários jogos o nível 4 joga parecido com o 3. Não existe medida de força além dessa escala.
+
+## Recursos
+
+- 10 jogos com regras próprias, todos na mesma mesa
+- A mesa ocupa a altura da tela: as cartas crescem até o maior tamanho que cabe, no computador, no tablet, no celular em pé e deitado
+- Cartas deslizam até o destino, com sons e vibração (opcionais)
+- Borda preta ou vermelha das cartas, com índice opcional (mês, planta e tipo) para quem está aprendendo
+- Estatísticas por jogo e partida salva por jogo
+- Menu lateral com atalho Outros Jogos, estatísticas e configurações (som, vibração, tremor, modo escuro, reduzir animações)
+- Instala no celular ou no computador e funciona offline
 
 ## Créditos das cartas
-Borda preta: Louie Mantia e すけじょ. Borda vermelha: Louie Mantia Jr. e すけじょ. CC BY-SA 4.0, via Wikimedia Commons.
-Detalhes em `hanafuda/CREDITOS.txt`. As imagens modificadas (renomeadas e otimizadas com SVGO) continuam sob a mesma licença.
 
-## O que é regra adotada
-Hanafuda tem muitas variantes. Koi-Koi, Hana-Awase e Hachi-Hachi seguem as regras mais comuns (o Hachi-Hachi sem nuke, tobikomi, hatto e tate-sanbon). Bakappana, Mushi, Tensho, Roppyakken, Sudaoshi, Oicho-Kabu e Kingo são adaptações simples, avisadas no Como Jogar de cada um.
+As imagens das cartas são dois conjuntos de arquivos SVG publicados no Wikimedia Commons, sob a licença Creative Commons Atribuição-CompartilhaIgual 4.0 Internacional ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)).
+
+| Conjunto | Autoria | Origem |
+|---|---|---|
+| Borda preta | Louie Mantia e すけじょ | [Hanafuda_January_Hikari_Alt.svg](https://commons.wikimedia.org/wiki/File:Hanafuda_January_Hikari_Alt.svg) |
+| Borda vermelha | Louie Mantia Jr. e すけじょ | [Hanafuda_January_Hikari_Alt2.svg](https://commons.wikimedia.org/wiki/File:Hanafuda_January_Hikari_Alt2.svg) |
+
+**Alterações feitas:** os arquivos foram renomeados (número da carta) e otimizados com o SVGO. A imagem do verso é uma cor lisa criada para este site. Como a licença exige o mesmo compartilhamento, as imagens modificadas continuam sob a CC BY-SA 4.0. O código do site é de outra autoria e não está sob essa licença.
+
+As regras foram reunidas de fontes públicas sobre Hanafuda. O projeto de código aberto [hanafuda-js](https://github.com/fudapop/hanafuda-js) serviu só de inspiração para o Koi-Koi, e nenhum código dele foi copiado.
+
+## Instalando como app
+
+- **Chrome e Edge (computador e Android):** botão **Instalar app** no menu ☰ ou o ícone na barra de endereço.
+- **Safari (iPhone e iPad):** Compartilhar, depois *Adicionar à Tela de Início*.
+
+## Família ON!
+
+HanafudaON! segue a base visual do **DiciON!** e faz parte da coleção Kana no Michi, dos jogos japoneses. Todos os jogos ficam em https://speccygames.netlify.app/.
+
+---
+
+Feito por Christian ([@Christian5910](https://github.com/Christian5910)).
